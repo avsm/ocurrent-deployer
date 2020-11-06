@@ -222,7 +222,7 @@ let v ~app ~notify:channel ~sched ~staging_auth () =
           ~archs:[`Linux_x86_64; `Linux_arm64; `Linux_ppc64];
       ];
       ocaml, "ocaml.org", [
-        docker "Dockerfile.deploy" ["master", "ocurrent/ocaml.org:live", [`C (`Ocamlorg_sw, "www3.ocaml.org", "51.159.78.124")]];
+        docker "Dockerfile.deploy" ["master", "ocurrent/ocaml.org:live", [`C (`Ocamlorg_sw, "www.ocaml.org", "51.159.78.124")]];
         docker "Dockerfile.staging" ["staging","ocurrent/ocaml.org:staging", [`C (`Ocamlorg_sw, "staging.ocaml.org", "51.159.79.64")]]
       ];
     ]
