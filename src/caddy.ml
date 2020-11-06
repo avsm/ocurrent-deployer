@@ -2,12 +2,11 @@
 
 type t = {
   name: string;
-  domains: string list;
+  domain: string;
   ip: string;
 }
 
-let caddy_service { name; domains; ip; _ } =
-  let domains = domains |> List.map (fun d -> "--domain " ^ d) |> String.concat " " in
+let caddy_service { name; domain; ip; _ } =
   let service = Fmt.strf {|
   %s:
     image: $IMAGE_HASH
@@ -22,7 +21,7 @@ let caddy_service { name; domains; ip; _ } =
     - target: 443
       published: 443
       protocol: tcp
-|} name domains name
+|} name domain name
   in
   let network = Fmt.strf {|
   %s_network:
@@ -46,3 +45,4 @@ networks:%s
 (* Replace $IMAGE_HASH in the compose file with the fixed (hash) image id *)
 let replace_hash_var ~hash contents =
   Re.Str.(global_replace (regexp_string "$IMAGE_HASH") hash contents)
+
