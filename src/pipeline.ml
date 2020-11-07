@@ -97,7 +97,7 @@ module Cluster = struct
 
   type service = [
     | `S of [`Toxis] * string
-    | `C of [`Ocamlorg_sw] * string * string
+    | `C of [`Ocamlorg_sw] * (string * string) list
   ]
 
   type deploy_info = {
@@ -155,10 +155,9 @@ module Cluster = struct
         |> List.map (
           function
           |`S (`Toxis, name) ->  pull_and_serve (module Toxis_docker) ~name `Service multi_hash
-          |`C (`Ocamlorg_sw, domain, ip) ->
+          |`C (`Ocamlorg_sw, domains) ->
               let name = Cluster_api.Docker.Image_id.tag hub_id in
-              let sites = [{Caddy.name; domain; ip }] in
-              let contents = Caddy.compose ~sites () in
+              let contents = Caddy.compose {Caddy.name; domains} in
               pull_and_serve (module Ocamlorg_docker) ~name (`Compose contents) multi_hash
         )
         |> Current.all
@@ -222,8 +221,8 @@ let v ~app ~notify:channel ~sched ~staging_auth () =
           ~archs:[`Linux_x86_64; `Linux_arm64; `Linux_ppc64];
       ];
       ocaml, "ocaml.org", [
-        docker "Dockerfile.deploy" ["master", "ocurrent/ocaml.org:live", [`C (`Ocamlorg_sw, "www.ocaml.org", "51.159.79.75"); `C (`Ocamlorg_sw, "ocaml.org", "51.159.78.124")]];
-        docker "Dockerfile.staging" ["staging","ocurrent/ocaml.org:staging", [`C (`Ocamlorg_sw, "staging.ocaml.org", "51.159.79.64")]]
+        docker "Dockerfile.deploy" ["master", "ocurrent/ocaml.org:live", [`C (`Ocamlorg_sw, ["www.ocaml.org", "51.159.79.75"; "ocaml.org", "51.159.78.124"])]];
+        docker "Dockerfile.staging" ["staging","ocurrent/ocaml.org:staging", [`C (`Ocamlorg_sw, ["staging.ocaml.org", "51.159.79.64"])]]
       ];
     ]
   and mirage_unikernels =

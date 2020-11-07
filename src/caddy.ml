@@ -2,11 +2,10 @@
 
 type t = {
   name: string;
-  domain: string;
-  ip: string;
+  domains: (string * string) list; (* domain ip *)
 }
 
-let caddy_service { name; domain; ip; _ } =
+let caddy_service name (domain, ip) =
   let service = Fmt.strf {|
   %s:
     image: $IMAGE_HASH
@@ -31,9 +30,9 @@ let caddy_service { name; domain; ip; _ } =
   in
   service, network
 
-let compose ~sites () =
-  sites |>
-  List.map caddy_service |>
+let compose sites =
+  sites.domains |>
+  List.map (caddy_service sites.name) |>
   List.fold_left (fun (s,n) (service, network) -> (s ^ service), (n ^ network)) ("","") |>
   fun (services, networks) ->
   Fmt.strf {|
@@ -45,4 +44,3 @@ networks:%s
 (* Replace $IMAGE_HASH in the compose file with the fixed (hash) image id *)
 let replace_hash_var ~hash contents =
   Re.Str.(global_replace (regexp_string "$IMAGE_HASH") hash contents)
-
