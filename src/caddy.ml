@@ -6,6 +6,7 @@ type t = {
 }
 
 let caddy_service name (domain, ip) =
+  let service_name = Fmt.strf "%s_%s" name (Re.Str.(global_replace (regexp_string ".") "_" domain)) in
   let service = Fmt.strf {|
   %s:
     image: $IMAGE_HASH
@@ -20,13 +21,13 @@ let caddy_service name (domain, ip) =
     - target: 443
       published: 443
       protocol: tcp
-|} name domain name
+|} service_name domain service_name
   in
   let network = Fmt.strf {|
   %s_network:
     driver_opts:
         com.docker.network.bridge.host_binding_ipv4: "%s"
-|} name ip
+|} service_name ip
   in
   service, network
 
